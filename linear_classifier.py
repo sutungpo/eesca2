@@ -125,7 +125,9 @@ class Softmax(LinearClassifier):
 # **************************************************#
 
 
-def svm_loss_naive(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float):
+def svm_loss_naive(
+    W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float
+):
     """
     Structured SVM loss function, naive implementation (with loops).
 
@@ -167,7 +169,9 @@ def svm_loss_naive(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float
                 # at the same time that the loss is being computed.                   #
                 #######################################################################
                 # Replace "pass" statement with your code
-                pass
+                dW[:, j] += X[i]
+                dW[:, y[i]] -= X[i]
+                
                 #######################################################################
                 #                       END OF YOUR CODE                              #
                 #######################################################################
@@ -175,7 +179,6 @@ def svm_loss_naive(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float
     # Right now the loss is a sum over all training examples, but we want it
     # to be an average instead so we divide by num_train.
     loss /= num_train
-
     # Add regularization to the loss.
     loss += reg * torch.sum(W * W)
 
@@ -185,7 +188,8 @@ def svm_loss_naive(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float
     # and add it to dW. (part 2)                                                #
     #############################################################################
     # Replace "pass" statement with your code
-    pass
+    dW /= num_train
+    dW += 2 * reg * W
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -193,7 +197,9 @@ def svm_loss_naive(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float
     return loss, dW
 
 
-def svm_loss_vectorized(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float):
+def svm_loss_vectorized(
+    W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float
+):
     """
     Structured SVM loss function, vectorized implementation. When you implment
     the regularization over W, please DO NOT multiply the regularization term by
@@ -219,7 +225,12 @@ def svm_loss_vectorized(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: 
     # result in loss.                                                           #
     #############################################################################
     # Replace "pass" statement with your code
-    pass
+    num_sample = X.shape[0]
+    scores = X.mm(W)
+    correct_scores = scores[torch.arange(num_sample),y].view(-1,1)
+    margins = torch.clamp((scores - correct_scores+1),min=0)
+    margins[torch.arange(num_sample),y] = 0
+    loss = margins.sum()/num_sample
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -234,43 +245,28 @@ def svm_loss_vectorized(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: 
     # loss.                                                                     #
     #############################################################################
     # Replace "pass" statement with your code
-    pass
-    #############################################################################
-    #                             END OF YOUR CODE                              #
-    #############################################################################
-    scores = X.mm(W)
-
-    # Number of examples
-    num_examples = X.size(0)
-
-    # Create a mask for the correct class scores
-    correct_class_scores = scores[torch.arange(num_examples), y].view(-1, 1)
-
-    # Calculate the margins
-    margins = torch.clamp(scores - correct_class_scores + 1, min=0)
-    margins[torch.arange(num_examples), y] = 0  # Ignore the correct class
-
-    # Compute the loss
-    loss = torch.sum(margins) / num_examples
     reg_term = 0.5 * reg * torch.sum(W * W)  # Regularization term
 
     # Add the regularization term to the loss
     loss += reg_term
 
     # Compute the gradient
-    binary = margins
-    binary[margins > 0] = 1
-    row_sum = torch.sum(binary, dim=1)
-    binary[torch.arange(num_examples), y] = -row_sum
-    dW = (X.t()).mm(binary)
-    dW /= num_examples
+    margins[margins > 0] = 1
+    row_sum = torch.sum(margins, dim=1)
+    margins[torch.arange(num_sample), y] = -row_sum
+    dW = (X.t()).mm(margins)
+    dW /= num_sample
     dW += reg * W  # Regularization gradient
+    #############################################################################
+    #                             END OF YOUR CODE                              #
+    #############################################################################
 
     return loss, dW
-    return loss, dW
 
 
-def sample_batch(X: torch.Tensor, y: torch.Tensor, num_train: int, batch_size: int):
+def sample_batch(
+    X: torch.Tensor, y: torch.Tensor, num_train: int, batch_size: int
+):
     """
     Sample batch_size elements from the training data and their
     corresponding labels to use in this round of gradient descent.
@@ -285,7 +281,10 @@ def sample_batch(X: torch.Tensor, y: torch.Tensor, num_train: int, batch_size: i
     # Hint: Use torch.randint to generate indices.                          #
     #########################################################################
     # Replace "pass" statement with your code
-    pass
+    num_samples = X.shape[0]
+    indices = torch.randint(0, num_samples, (batch_size,))
+    X_batch = X[indices]
+    y_batch = y[indices]
     #########################################################################
     #                       END OF YOUR CODE                                #
     #########################################################################
@@ -331,7 +330,9 @@ def train_linear_classifier(
     if W is None:
         # lazily initialize W
         num_classes = torch.max(y) + 1
-        W = 0.000001 * torch.randn(dim, num_classes, device=X.device, dtype=X.dtype)
+        W = 0.000001 * torch.randn(
+            dim, num_classes, device=X.device, dtype=X.dtype
+        )
     else:
         num_classes = W.shape[1]
 
@@ -351,7 +352,7 @@ def train_linear_classifier(
         # Update the weights using the gradient and the learning rate.          #
         #########################################################################
         # Replace "pass" statement with your code
-        pass
+        W -= learning_rate * grad
         #########################################################################
         #                       END OF YOUR CODE                                #
         #########################################################################
@@ -382,7 +383,7 @@ def predict_linear_classifier(W: torch.Tensor, X: torch.Tensor):
     # Implement this method. Store the predicted labels in y_pred.            #
     ###########################################################################
     # Replace "pass" statement with your code
-    pass
+    y_pred = X.mm(W).argmax(dim=1)
     ###########################################################################
     #                           END OF YOUR CODE                              #
     ###########################################################################
@@ -473,7 +474,9 @@ def test_one_param_set(
 # **************************************************#
 
 
-def softmax_loss_naive(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float):
+def softmax_loss_naive(
+    W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float
+):
     """
     Softmax loss function, naive implementation (with loops).  When you implment
     the regularization over W, please DO NOT multiply the regularization term by

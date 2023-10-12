@@ -402,8 +402,8 @@ def svm_get_search_params():
                                 e.g. [1e0, 1e1, ...]
     """
 
-    learning_rates = []
-    regularization_strengths = []
+    learning_rates = [1e-4, 1e-3,1e-2, 1e-1]
+    regularization_strengths = [1e0, 1e1,1e2, 1e3]
 
     ###########################################################################
     # TODO:   add your own hyper parameter lists.                             #

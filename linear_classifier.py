@@ -510,37 +510,26 @@ def softmax_loss_naive(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: f
     # regularization!                                                           #
     #############################################################################
     # Replace "pass" statement with your code
-    N, D = X.shape
+    loss = torch.tensor(0.0)
+    dW = torch.zeros_like(W)
+    
+    # Get number of classes and samples
     C = W.shape[1]
-
-    # Initialize the loss and gradient
-    loss = 0.0
-    grad_W = torch.zeros_like(W)
-
-    for i in range(N):
-        # Compute scores for each class
-        scores = X[i].mm(W)
-        scores -= torch.max(scores)  # For numerical stability
-
-        # Compute the softmax probabilities
-        exp_scores = torch.exp(scores)
-        probs = exp_scores / torch.sum(exp_scores)
-
-        # Update the loss with the negative log-likelihood of the correct class
-        loss -= torch.log(probs[y[i]])
-
-        # Compute the gradient for this example
-        dscores = probs
-        dscores[y[i]] -= 1
-        grad_W += X[i].view(-1, D, 1).mm(dscores.view(-1, 1, C))
-
-    # Average the loss and the gradient over all examples
-    loss /= N
-    grad_W /= N
-
-    # Add regularization to the loss and gradient
+    N = X.shape[0]
+    
+    # Compute unregularized loss
+    scores = X @ W
+    scores -= torch.max(scores, dim=1, keepdim=True).values # For numerical stability
+    loss = torch.mean(-scores[torch.arange(N), y] + torch.log(torch.sum(torch.exp(scores), dim=1)))
+    
+    # Compute gradient
+    probs = torch.exp(scores) / torch.sum(torch.exp(scores), dim=1, keepdim=True)
+    probs[torch.arange(N), y] -= 1
+    dW = (X.T @ probs) / N
+    
+    # Add regularization to loss and gradient
     loss += reg * torch.sum(W * W)
-    grad_W += 2 * reg * W
+    dW += 2 * reg * W
     #############################################################################
     #                          END OF YOUR CODE                                 #
     #############################################################################

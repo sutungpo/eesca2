@@ -458,10 +458,15 @@ def test_one_param_set(
     ###########################################################################
     # Feel free to uncomment this, at the very beginning,
     # and don't forget to remove this line before submitting your final version
-    # num_iters = 100
+    num_iters = 100
 
     # Replace "pass" statement with your code
-    pass
+    classifier = cls()
+    classifier.train(data_dict["X_train"], data_dict["y_train"], lr, reg, num_iters)
+    x_pre = classifier.predict(data_dict["X_train"])
+    y_pre = classifier.predict(data_dict["X_val"])
+    train_acc = (x_pre == data_dict['y_train']).sum() / len(x_pre)
+    val_acc = (y_pre == data_dict["y_val"]).sum() / len(y_pre)
     ############################################################################
     #                            END OF YOUR CODE                              #
     ############################################################################

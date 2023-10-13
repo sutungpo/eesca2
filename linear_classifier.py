@@ -478,9 +478,7 @@ def test_one_param_set(
 # **************************************************#
 
 
-def softmax_loss_naive(
-    W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float
-):
+def softmax_loss_naive(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: float):
     """
     Softmax loss function, naive implementation (with loops).  When you implment
     the regularization over W, please DO NOT multiply the regularization term by
@@ -512,7 +510,21 @@ def softmax_loss_naive(
     # regularization!                                                           #
     #############################################################################
     # Replace "pass" statement with your code
-    pass
+    num_classes = W.shape[1]
+    num_train = X.shape[0]
+    loss = 0.0
+    for i in range(num_train):
+        scores = torch.exp(W.t().mv(X[i]))
+        correct_class_score = scores[y[i]]
+        loss_i = -torch.log(correct_class_score / scores)
+        loss += loss_i
+        dW[:, y[i]] -= X[i].T
+        for j in range(num_classes):
+            dW[:, j] += torch.exp(scores[j]) * X[i].T
+    loss /= num_train
+    dW /= num_train
+    loss += reg * torch.sum(W * W)
+    dW += 2 * reg * W
     #############################################################################
     #                          END OF YOUR CODE                                 #
     #############################################################################
@@ -542,7 +554,24 @@ def softmax_loss_vectorized(
     # regularization!                                                           #
     #############################################################################
     # Replace "pass" statement with your code
-    pass
+    C = W.shape[1]
+    N = X.shape[0]
+
+    # Compute unregularized loss
+    scores = X @ W
+    scores -= torch.max(scores, dim=1, keepdim=True).values  # For numerical stability
+    loss = torch.mean(
+        -scores[torch.arange(N), y] + torch.log(torch.sum(torch.exp(scores), dim=1))
+    )
+
+    # Compute gradient
+    probs = torch.exp(scores) / torch.sum(torch.exp(scores), dim=1, keepdim=True)
+    probs[torch.arange(N), y] -= 1
+    dW = (X.T @ probs) / N
+
+    # Add regularization to loss and gradient
+    loss += reg * torch.sum(W * W)
+    dW += 2 * reg * W
     #############################################################################
     #                          END OF YOUR CODE                                 #
     #############################################################################
@@ -561,8 +590,8 @@ def softmax_get_search_params():
     - regularization_strengths: regularization strengths candidates
                                 e.g. [1e0, 1e1, ...]
     """
-    learning_rates = []
-    regularization_strengths = []
+    learning_rates = [1e-4, 1e-3, 1e-2, 1e-1]
+    regularization_strengths = [1e-2, 1e-1, 1e0, 1e1, 1e2]
 
     ###########################################################################
     # TODO: Add your own hyper parameter lists. This should be similar to the #

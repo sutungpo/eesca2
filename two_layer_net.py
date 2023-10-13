@@ -389,7 +389,8 @@ def nn_predict(
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
     # Replace "pass" statement with your code
-    pass
+    scores = loss_func(params, X, None)
+    y_pred = scores.argmax(dim=1)
     ###########################################################################
     #                              END OF YOUR CODE                           #
     ###########################################################################

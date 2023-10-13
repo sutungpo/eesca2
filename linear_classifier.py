@@ -458,7 +458,7 @@ def test_one_param_set(
     ###########################################################################
     # Feel free to uncomment this, at the very beginning,
     # and don't forget to remove this line before submitting your final version
-    num_iters = 100
+    # num_iters = 100
 
     # Replace "pass" statement with your code
     cls.train(data_dict["X_train"], data_dict["y_train"], lr, reg, num_iters)

@@ -514,9 +514,9 @@ def softmax_loss_naive(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: f
     num_train = X.shape[0]
     loss = 0.0
     for i in range(num_train):
-        scores = torch.exp(W.t().mv(X[i]))
-        correct_class_score = scores[y[i]]
-        loss_i = -torch.log(correct_class_score / scores)
+        scores = X[i].matmul(W)
+        scores -= torch.max(scores) # For numerical stability
+        loss_i = -scores[y[i]] + torch.log(torch.sum(torch.exp(scores)))
         loss += loss_i
         dW[:, y[i]] -= X[i].T
         for j in range(num_classes):

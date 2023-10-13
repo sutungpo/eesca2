@@ -504,7 +504,7 @@ def find_best_net(
                     net = TwoLayerNet(
                         input_size=data_dict["X_train"].size(1),
                         hidden_size=hidden_size,
-                        num_classes=data_dict["y_train"].size(0),
+                        output_size=data_dict["y_train"].size(0),
                     )
 
                     # Train the network

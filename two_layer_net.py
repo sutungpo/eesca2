@@ -413,7 +413,7 @@ def nn_get_search_params():
     - learning_rate_decays: learning rate decay candidates
                                 e.g. [1.0, 0.95, ...]
     """
-    learning_rates = [1e-4, 1e-3, 1e-2, 1e-1]
+    learning_rates = [1e-2, 1e-1,1e0,1e1]
     hidden_sizes = [8, 16, 32, 64]
     regularization_strengths = [
         1e-2,

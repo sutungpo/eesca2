@@ -464,8 +464,8 @@ def test_one_param_set(
     cls.train(data_dict["X_train"], data_dict["y_train"], lr, reg, num_iters)
     x_pre = cls.predict(data_dict["X_train"])
     y_pre = cls.predict(data_dict["X_val"])
-    train_acc = (x_pre == data_dict['y_train']).sum() / len(x_pre)
-    val_acc = (y_pre == data_dict["y_val"]).sum() / len(y_pre)
+    train_acc = ((x_pre == data_dict['y_train']).sum() / len(x_pre)).cpu()
+    val_acc = ((y_pre == data_dict["y_val"]).sum() / len(y_pre)).cpu()
     ############################################################################
     #                            END OF YOUR CODE                              #
     ############################################################################

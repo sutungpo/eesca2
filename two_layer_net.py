@@ -214,7 +214,10 @@ def nn_forward_backward(
     # (Check Numeric Stability in http://cs231n.github.io/linear-classify/).   #
     ############################################################################
     # Replace "pass" statement with your code
-    pass
+    exp_scores = torch.exp(scores)
+    probs = exp_scores / exp_scores.sum(dim=1, keepdim=True)
+    loss = -torch.log(probs[range(N), y]).mean()
+    loss += reg * (W1**2).sum() + reg * (W2**2).sum()
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -228,7 +231,23 @@ def nn_forward_backward(
     # tensor of same size                                                     #
     ###########################################################################
     # Replace "pass" statement with your code
-    pass
+    dscores = probs
+    dscores[range(N), y] -= 1
+    dscores /= N
+
+    # Backpropagate into W2 and b2
+    grads["W2"] = h1.t().mm(dscores) + 2 * reg * W2
+    grads["b2"] = torch.sum(dscores, dim=0)
+
+    # Backpropagate into hidden layer
+    dh1 = dscores.mm(W2.t())
+
+    # Backpropagate into ReLU non-linearity
+    dh1[h1 <= 0] = 0
+
+    # Backpropagate into W1 and b1
+    grads["W1"] = X.t().mm(dh1) + 2 * reg * W1
+    grads["b1"] = torch.sum(dh1, dim=0)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################

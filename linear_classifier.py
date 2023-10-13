@@ -510,26 +510,42 @@ def softmax_loss_naive(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: f
     # regularization!                                                           #
     #############################################################################
     # Replace "pass" statement with your code
-    num_classes = W.shape[1]
-    num_train = X.shape[0]
+    N, D = X.shape
+    C = W.shape[1]
+
+    # Initialize the loss and gradient
     loss = 0.0
-    for i in range(num_train):
-        scores = X[i].matmul(W)
-        scores -= torch.max(scores) # For numerical stability
-        loss_i = -scores[y[i]] + torch.log(torch.sum(torch.exp(scores)))
-        loss += loss_i
-        dW[:, y[i]] -= X[i].T
-        for j in range(num_classes):
-            dW[:, j] += torch.exp(scores[j]) * X[i].T
-    loss /= num_train
-    dW /= num_train
+    grad_W = torch.zeros_like(W)
+
+    for i in range(N):
+        # Compute scores for each class
+        scores = X[i].mm(W)
+        scores -= torch.max(scores)  # For numerical stability
+
+        # Compute the softmax probabilities
+        exp_scores = torch.exp(scores)
+        probs = exp_scores / torch.sum(exp_scores)
+
+        # Update the loss with the negative log-likelihood of the correct class
+        loss -= torch.log(probs[y[i]])
+
+        # Compute the gradient for this example
+        dscores = probs
+        dscores[y[i]] -= 1
+        grad_W += X[i].view(-1, D, 1).mm(dscores.view(-1, 1, C))
+
+    # Average the loss and the gradient over all examples
+    loss /= N
+    grad_W /= N
+
+    # Add regularization to the loss and gradient
     loss += reg * torch.sum(W * W)
-    dW += 2 * reg * W
+    grad_W += 2 * reg * W
     #############################################################################
     #                          END OF YOUR CODE                                 #
     #############################################################################
 
-    return loss, dW
+    return loss, grad_W
 
 
 def softmax_loss_vectorized(

@@ -490,7 +490,41 @@ def find_best_net(
     # automatically like we did on the previous exercises.                      #
     #############################################################################
     # Replace "pass" statement with your code
-    pass
+    (
+        learning_rates,
+        hidden_sizes,
+        regularization_strengths,
+        learning_rate_decays,
+    ) = get_param_set_fn()
+
+    for lr in learning_rates:
+        for hidden_size in hidden_sizes:
+            for reg in regularization_strengths:
+                for lr_decay in learning_rate_decays:
+                    net = TwoLayerNet(
+                        input_size=data_dict["X_train"].size(1),
+                        hidden_size=hidden_size,
+                        num_classes=data_dict["y_train"].size(0),
+                    )
+
+                    # Train the network
+                    stats = net.train(
+                        data_dict["X_train"],
+                        data_dict["y_train"],
+                        data_dict["X_val"],
+                        data_dict["y_val"],
+                        learning_rate=lr,
+                        learning_rate_decay=lr_decay,
+                        reg=reg,
+                    )
+
+                    # Get the best validation accuracy
+                    val_acc = max(stats["val_acc_history"])
+
+                    if val_acc > best_val_acc:
+                        best_val_acc = val_acc
+                        best_net = net
+                        best_stat = stats
     #############################################################################
     #                               END OF YOUR CODE                            #
     #############################################################################

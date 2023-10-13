@@ -534,7 +534,7 @@ def softmax_loss_naive(W: torch.Tensor, X: torch.Tensor, y: torch.Tensor, reg: f
     #                          END OF YOUR CODE                                 #
     #############################################################################
 
-    return loss, grad_W
+    return loss, dW
 
 
 def softmax_loss_vectorized(

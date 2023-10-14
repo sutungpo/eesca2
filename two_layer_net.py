@@ -415,7 +415,7 @@ def nn_get_search_params():
     """
     learning_rates = [1e-3,1e-2, 1e-1,1e0]
     hidden_sizes = [16, 32, 64,128]
-    regularization_strengths = [1e-1,0, 1e-5, 1e-3, 1e-1]
+    regularization_strengths = [1e1,0,1e-3, 1e-1]
     learning_rate_decays = []
     ###########################################################################
     # TODO: Add your own hyper parameter lists. This should be similar to the #
@@ -494,9 +494,6 @@ def find_best_net(
     for reg in regularization_strengths:
         for lr in learning_rates:
             for hs in hidden_sizes:
-                print('train with hidden_size: {}'.format(hs))
-                print('train with learning_rate: {}'.format(lr))
-                print('train with regularization: {}'.format(reg))
                 # fix random seed before we generate a set of parameters
                 #eecs598.reset_seed(0)
                 net = TwoLayerNet(3 * 32 * 32, hs, 10, device=data_dict['X_train'].device, dtype=data_dict['X_train'].dtype)
@@ -508,6 +505,9 @@ def find_best_net(
                     best_val_acc = max(stats['val_acc_history'])
                     best_net = net
                     best_stat = stats
+                    print('new best hidden_size: {}'.format(hs))
+                    print('new best learning_rate: {}'.format(lr))
+                    print('new best regularization: {}'.format(reg))
     #############################################################################
     #                               END OF YOUR CODE                            #
     #############################################################################

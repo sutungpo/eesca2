@@ -414,8 +414,8 @@ def nn_get_search_params():
                                 e.g. [1.0, 0.95, ...]
     """
     learning_rates = [1e-3,1e-2, 1e-1,1e0]
-    hidden_sizes = [8, 16, 32, 64]
-    regularization_strengths = [0, 1e-5, 1e-3, 1e-1]
+    hidden_sizes = [16, 32, 64,128]
+    regularization_strengths = [1e-1,0, 1e-5, 1e-3, 1e-1]
     learning_rate_decays = []
     ###########################################################################
     # TODO: Add your own hyper parameter lists. This should be similar to the #

@@ -415,13 +415,8 @@ def nn_get_search_params():
     """
     learning_rates = [1e-3,1e-2, 1e-1,1e0]
     hidden_sizes = [8, 16, 32, 64]
-    regularization_strengths = [
-        1e-2,
-        1e-1,
-        1e0,
-        1e1,
-    ]
-    learning_rate_decays = [1.0, 0.95, 0.9, 0.85]
+    regularization_strengths = [0, 1e-5, 1e-3, 1e-1]
+    learning_rate_decays = []
     ###########################################################################
     # TODO: Add your own hyper parameter lists. This should be similar to the #
     # hyperparameters that you used for the SVM, but you may need to select   #
@@ -496,35 +491,23 @@ def find_best_net(
         regularization_strengths,
         learning_rate_decays,
     ) = get_param_set_fn()
-
+  for reg in regularization_strengths:
     for lr in learning_rates:
-        for hidden_size in hidden_sizes:
-            for reg in regularization_strengths:
-                for lr_decay in learning_rate_decays:
-                    net = TwoLayerNet(
-                        input_size=data_dict["X_train"].size(1),
-                        hidden_size=hidden_size,
-                        output_size=data_dict["y_train"].size(0),
-                    )
-
-                    # Train the network
-                    stats = net.train(
-                        data_dict["X_train"],
-                        data_dict["y_train"],
-                        data_dict["X_val"],
-                        data_dict["y_val"],
-                        learning_rate=lr,
-                        learning_rate_decay=lr_decay,
-                        reg=reg,
-                    )
-
-                    # Get the best validation accuracy
-                    val_acc = stats["val_acc_history"][-1]
-
-                    if val_acc > best_val_acc:
-                        best_val_acc = val_acc
-                        best_net = net
-                        best_stat = stats
+      for hs in hidden_sizes:
+        print('train with hidden_size: {}'.format(hs))
+        print('train with learning_rate: {}'.format(lr))
+        print('train with regularization: {}'.format(reg))
+        # fix random seed before we generate a set of parameters
+        #eecs598.reset_seed(0)
+        net = TwoLayerNet(3 * 32 * 32, hs, 10, device=data_dict['X_train'].device, dtype=data_dict['X_train'].dtype)
+        stats = net.train(data_dict['X_train'], data_dict['y_train'], data_dict['X_val'], data_dict['y_val'],
+                  num_iters=3000, batch_size=1000,
+                  learning_rate=lr, learning_rate_decay=0.95,
+                  reg=reg, verbose=False)
+        if max(stats['val_acc_history']) > best_val_acc:
+          best_val_acc = max(stats['val_acc_history'])
+          best_net = net
+          best_stat = stats
     #############################################################################
     #                               END OF YOUR CODE                            #
     #############################################################################
